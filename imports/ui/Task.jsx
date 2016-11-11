@@ -1,5 +1,6 @@
 import React, { Component, PropTypes } from 'react';
-import Tasks from '../api/tasks.js';
+import {Tasks} from '../api/tasks.js';
+
 
 
 export default class Task extends Component {
@@ -10,11 +11,27 @@ export default class Task extends Component {
     }
 
     deleteTask() {
-        Tasks.remove(this.props.tasks._id);
+        Tasks.remove(this.props.task._id);
     }
 
     render() {
-        return (<li>{this.props.task.text}</li>);
+        const className = this.props.task.checked ? 'checked' : ''
+
+        return (
+            <li className={className}>
+                <button className="delete"
+                        onClick = {this.deleteTask.bind(this)}>
+                    &times;
+                </button>
+                
+                <input type="checkbox"
+                       readOnly
+                       checked={this.props.task.checked}
+                       onClick={this.toggleChecked.bind(this)}/>
+
+                <span className="text">{this.props.task.text}</span>
+            </li>
+        );
     }
 }
 
