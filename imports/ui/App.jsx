@@ -34,7 +34,12 @@ class App extends Component {
         if (this.state.hideCompleted) {
             filteredTasks = filteredTasks.filter((task) => !task.checked)
         }
-        return filteredTasks.map((task) => (<Task key={task._id} task={task} />));
+        return filteredTasks.map((task) => {
+            const currentUserId = this.props.currentUser && this.props.currentUser._id;
+            const showPrivateButton = task.owner === currentUserId;
+
+            return (<Task key={task._id} task={task} showPrivateButton={showPrivateButton} />)
+        });
     }
 
     render() {
@@ -42,23 +47,23 @@ class App extends Component {
             <div className="container">
                 <header>
                     <h1>Todo List ({this.props.numberOfIncomplete})</h1>
-                        <label className="hide-completed">
-                            <input type="checkbox"
-                                readOnly
-                                checked={this.state.hideCompleted}
-                                onClick={this.toggleHideCompleted.bind(this)} />
-                            Hide completed tasks.
+                    <label className="hide-completed">
+                        <input type="checkbox"
+                            readOnly
+                            checked={this.state.hideCompleted}
+                            onClick={this.toggleHideCompleted.bind(this)} />
+                        Hide completed tasks.
                         </label>
 
-                        <AccountsUIWrapper />
-                        {
-                            this.props.currentUser ?
-                                <form className="new-task" onSubmit={this.handleSubmit.bind(this)}>
-                                    <input type="text"
-                                        ref="textInput"
-                                        placeholder="Type to add new tasks" />
-                                </form> : ''
-                        }
+                    <AccountsUIWrapper />
+                    {
+                        this.props.currentUser ?
+                            <form className="new-task" onSubmit={this.handleSubmit.bind(this)}>
+                                <input type="text"
+                                    ref="textInput"
+                                    placeholder="Type to add new tasks" />
+                            </form> : ''
+                    }
                 </header>
                 <ul>
                     {this.renderTasks()}
@@ -75,6 +80,7 @@ App.propTypes = {
 }
 
 export default createContainer(() => {
+    Meteor.subscribe('tasks');
     return {
         tasks: Tasks.find({}, { sort: { createdAt: -1 } }).fetch(),
         numberOfIncomplete: Tasks.find({ checked: { $ne: true } }).count(),
